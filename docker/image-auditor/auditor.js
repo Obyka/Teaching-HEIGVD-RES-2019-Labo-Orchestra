@@ -32,8 +32,11 @@ function checkActiveMusician(){
 
 
 var server = net.createServer(function(socket) {
-	socket.write(activeMusician);
+  socket.write(activeMusician);
+  socket.write("\r\n");
+  socket.end();
 });
 
 server.listen(2205, '0.0.0.0');
 setInterval(checkActiveMusician, 1000);
+
