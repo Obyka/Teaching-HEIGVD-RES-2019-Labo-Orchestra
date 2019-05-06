@@ -107,13 +107,13 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 |Question | How can we represent the system in an **architecture diagram**, which gives information both about the Docker containers, the communication protocols and the commands? |
 | | *Insert your diagram here...* |
 |Question | Who is going to **send UDP datagrams** and **when**? |
-| | *Enter your response here...* |
+| | Each time a musician emits a sound, it sends an UDP datagram |
 |Question | Who is going to **listen for UDP datagrams** and what should happen when a datagram is received? |
-| | *Enter your response here...* |
+| | The server is listening to datagrams. Callback is called each time a datagram is received and it logs its musician as active |
 |Question | What **payload** should we put in the UDP datagrams? |
-| | *Enter your response here...* |
+| | I send the current timestamp (to check activity), instrument, noise, and an UUID which identify the musician |
 |Question | What **data structures** do we need in the UDP sender and receiver? When will we update these data structures? When will we query these data structures? |
-| | *Enter your response here...* |
+| | I use a map in the musician and the auditor. In the musician, I simply associate a instrument and its sound. In the auditor, I bind an UUID to a musician. Then, I am able to tell which one is active or not by browsing my map every once in a while. |
 
 
 ## Task 2: implement a "musician" Node.js application
@@ -121,21 +121,21 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | --- |
 |Question | In a JavaScript program, if we have an object, how can we **serialize it in JSON**? |
-| | *Enter your response here...*  |
+| | stringify  |
 |Question | What is **npm**?  |
-| | *Enter your response here...*  |
+| | npm is a package manager for the JavaScript programming language.  |
 |Question | What is the `npm install` command and what is the purpose of the `--save` flag?  |
-| | *Enter your response here...*  |
+| | It allows to download package. The flag put the installed package in the dependencies.  |
 |Question | How can we use the `https://www.npmjs.com/` web site?  |
-| | *Enter your response here...*  |
+| | We can search and install package from it.  |
 |Question | In JavaScript, how can we **generate a UUID** compliant with RFC4122? |
-| | *Enter your response here...*  |
+| | We need to install the package UUID and then use its method (e.g `uuidv4()`)  |
 |Question | In Node.js, how can we execute a function on a **periodic** basis? |
-| | *Enter your response here...*  |
+| | We use setInterval  |
 |Question | In Node.js, how can we **emit UDP datagrams**? |
-| | *Enter your response here...*  |
+| | First, we create the socket `var s = dgram.createSocket('udp4');` Then we call the send function `socket.send(msg[, offset, length][, port][, address][, callback])`|
 |Question | In Node.js, how can we **access the command line arguments**? |
-| | *Enter your response here...*  |
+| | Thanks to the array `process.argv`  |
 
 
 ## Task 3: package the "musician" app in a Docker image
@@ -143,17 +143,17 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | --- |
 |Question | How do we **define and build our own Docker image**?|
-| | *Enter your response here...*  |
+| | We need to create a Dockerfile which will install the required package and apps  |
 |Question | How can we use the `ENTRYPOINT` statement in our Dockerfile?  |
-| | *Enter your response here...*  |
+| | If I specify my JS script to be the entrypoint, I will be able to give args while constructing new containers.  |
 |Question | After building our Docker image, how do we use it to **run containers**?  |
-| | *Enter your response here...*  |
+| | `docker run -p port:port -d imageName` |
 |Question | How do we get the list of all **running containers**?  |
-| | *Enter your response here...*  |
+| | `docker ps`  |
 |Question | How do we **stop/kill** one running container?  |
-| | *Enter your response here...*  |
+| | `docker stop containerID /docker rm containerID`  |
 |Question | How can we check that our running containers are effectively sending UDP datagrams?  |
-| | *Enter your response here...*  |
+| | You can, for example, launch wireshark and trace UDP.  |
 
 
 ## Task 4: implement an "auditor" Node.js application
@@ -161,15 +161,24 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | ---  |
 |Question | With Node.js, how can we listen for UDP datagrams in a multicast group? |
-| | *Enter your response here...*  |
+| | You need to subscribe to the multicast group. `  s.addMembership(protocol.PROTOCOL_MULTICAST_ADDRESS);`  |
 |Question | How can we use the `Map` built-in object introduced in ECMAScript 6 to implement a **dictionary**?  |
-| | *Enter your response here...* |
+| | ? |
 |Question | How can we use the `Moment.js` npm module to help us with **date manipulations** and formatting?  |
-| | *Enter your response here...* |
+| | `npm install moment var moment = require('moment'); moment().format();` |
 |Question | When and how do we **get rid of inactive players**?  |
-| | *Enter your response here...* |
+| | I trigger a function each second which controls if the timestamp in the datagram is older than 5 seconds or not. |
 |Question | How do I implement a **simple TCP server** in Node.js?  |
-| | *Enter your response here...* |
+| | With the datagram `net`. 
+```
+var server = net.createServer(function(socket) {
+	socket.write(activeMusician);
+});
+
+server.listen(2205, '127.0.0.1');
+setInterval(checkActiveMusician, 1000); 
+```
+|
 
 
 ## Task 5: package the "auditor" app in a Docker image
@@ -177,7 +186,7 @@ When you connect to the TCP interface of the **Auditor**, you should receive an 
 | #  | Topic |
 | ---  | --- |
 |Question | How do we validate that the whole system works, once we have built our Docker image? |
-| | *Enter your response here...* |
+| | Just launch the `validate.sh` script |
 
 
 ## Constraints
